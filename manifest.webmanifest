@@ -1,0 +1,9 @@
+{
+  "name":"EMNHS Secure Examination Portal",
+  "short_name":"EMNHS Exam",
+  "start_url":".",
+  "display":"fullscreen",
+  "background_color":"#eef3f8",
+  "theme_color":"#0b2a5b",
+  "icons":[]
+}

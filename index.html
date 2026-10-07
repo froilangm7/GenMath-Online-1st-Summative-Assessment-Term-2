@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0b2a5b">
+  <title>EMNHS Secure Examination Portal</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main id="app">
+    <section id="startScreen" class="card">
+      <div class="brand">EMNHS • SECURE ONLINE ASSESSMENT</div>
+      <h1>Term 2 Summative Assessment</h1>
+      <p class="subtitle">Life and Career Skills • Grade 11</p>
+
+      <div class="notice">
+        <strong>Important:</strong> This portal is a supervised examination launcher.
+        Once you press <b>START EXAM</b>, leaving this page, switching apps/tabs,
+        minimizing the browser, or losing the page focus will trigger an examination
+        security event and freeze this session.
+      </div>
+
+      <label>
+        Student name
+        <input id="studentName" autocomplete="name" placeholder="Enter your full name">
+      </label>
+
+      <label>
+        Section
+        <input id="section" placeholder="Enter your section">
+      </label>
+
+      <label class="check">
+        <input type="checkbox" id="agreement">
+        <span>I understand the examination rules and will use only this device and the exam.</span>
+      </label>
+
+      <button id="startBtn" disabled>START EXAM</button>
+      <p class="small">
+        If a security event occurs accidentally, do not repeatedly refresh or reopen the page.
+        Follow your teacher's instructions.
+      </p>
+    </section>
+
+    <section id="examScreen" class="card hidden">
+      <div class="topbar">
+        <span id="studentBadge"></span>
+        <span id="status" class="status">SECURE SESSION ACTIVE</span>
+      </div>
+
+      <div class="timer" id="timer">40:00</div>
+
+      <div class="instructions">
+        <b>Exam active.</b> Do not switch apps/tabs, minimize the browser, use split screen,
+        open another window, or leave this examination portal.
+      </div>
+
+      <div class="form-frame-wrap">
+        <iframe id="formsFrame" title="Microsoft Forms examination"
+          allow="fullscreen"
+          referrerpolicy="strict-origin-when-cross-origin"></iframe>
+      </div>
+    </section>
+
+    <section id="lockedScreen" class="card locked hidden">
+      <div class="lock-icon">🔒</div>
+      <h1>EXAMINATION SESSION FROZEN</h1>
+      <p id="lockReason"></p>
+      <div class="incident">
+        <b>Security event:</b>
+        <span id="incidentType"></span><br>
+        <b>Time:</b>
+        <span id="incidentTime"></span>
+      </div>
+      <p>
+        Your online response session has been frozen. Do not attempt to reopen the exam.
+        Please wait for your teacher/proctor.
+      </p>
+      <button id="paperBtn" class="secondary">I WILL TAKE THE SUPERVISED PAPER VERSION</button>
+    </section>
+  </main>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
