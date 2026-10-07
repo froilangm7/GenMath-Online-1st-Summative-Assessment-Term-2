@@ -16,9 +16,14 @@ let secondsLeft = EXAM_MINUTES * 60;
 let timerHandle = null;
 let incidentSent = false;
 
+// Strike System Counters
+let violationCount = 0;
+const MAX_VIOLATIONS = 3; // Freezes session on the 3rd violation
+
 agreement.addEventListener("change", () => {
   startBtn.disabled = !agreement.checked || !studentName.value.trim() || !section.value.trim();
 });
+
 [studentName, section].forEach(el => el.addEventListener("input", () => {
   startBtn.disabled = !agreement.checked || !studentName.value.trim() || !section.value.trim();
 }));
@@ -74,6 +79,18 @@ function freezeExam(type, message) {
   try { document.exitFullscreen?.(); } catch (_) {}
 }
 
+function handleViolation(type, message) {
+  if (!started || frozen) return;
+  
+  violationCount++;
+  
+  if (violationCount >= MAX_VIOLATIONS) {
+    freezeExam(type, message);
+  } else {
+    alert(`WARNING (${violationCount}/${MAX_VIOLATIONS - 1}): Please do not leave or exit the examination screen!`);
+  }
+}
+
 function updateTimer() {
   const m = Math.floor(secondsLeft / 60).toString().padStart(2,"0");
   const s = (secondsLeft % 60).toString().padStart(2,"0");
@@ -107,14 +124,12 @@ startBtn.addEventListener("click", async () => {
 });
 
 /*
-  IMPORTANT:
-  These browser events are useful as a deterrent and incident flag.
-  They are NOT a secure OS-level lockdown. A determined student can sometimes
-  bypass browser-level controls, and Android behavior varies by browser/device.
+  VISIBILITY, FOCUS, AND SECURITY LISTENERS
+  With Strike/Warning System
 */
 document.addEventListener("visibilitychange", () => {
   if (started && document.hidden) {
-    freezeExam(
+    handleViolation(
       "PAGE/APP VISIBILITY LOST",
       "The examination page was no longer visible. Your session has been frozen for teacher verification."
     );
@@ -123,7 +138,7 @@ document.addEventListener("visibilitychange", () => {
 
 window.addEventListener("blur", () => {
   if (started) {
-    freezeExam(
+    handleViolation(
       "WINDOW/FOCUS LOST",
       "The examination window lost focus. Your session has been frozen for teacher verification."
     );
@@ -138,7 +153,7 @@ window.addEventListener("pagehide", () => {
 
 document.addEventListener("fullscreenchange", () => {
   if (started && !document.fullscreenElement && !frozen) {
-    freezeExam(
+    handleViolation(
       "FULLSCREEN EXITED",
       "Fullscreen mode was exited. Your session has been frozen for teacher verification."
     );
@@ -150,7 +165,7 @@ $("paperBtn").addEventListener("click", () => {
 });
 
 /*
-  Keyboard deterrence. This is NOT a security boundary.
+  Keyboard deterrence.
 */
 document.addEventListener("keydown", (e) => {
   if (!started) return;
@@ -158,6 +173,6 @@ document.addEventListener("keydown", (e) => {
       (e.ctrlKey && ["l","t","n","w","r","u","s","p"].includes(e.key.toLowerCase())) ||
       (e.metaKey && ["l","t","n","w","r","u","s","p"].includes(e.key.toLowerCase()))) {
     e.preventDefault();
-    freezeExam("RESTRICTED KEYBOARD COMMAND", "A restricted browser command was detected.");
+    handleViolation("RESTRICTED KEYBOARD COMMAND", "A restricted browser command was detected.");
   }
 });
