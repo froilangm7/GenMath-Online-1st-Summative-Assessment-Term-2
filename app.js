@@ -34,7 +34,7 @@ async function requestFullscreen() {
       await document.documentElement.requestFullscreen();
     }
   } catch (_) {
-    // Fullscreen can be denied by browser/OS. The portal continues, but visibility rules remain active.
+    // Fullscreen can be denied by browser/OS. The portal continues.
   }
 }
 
@@ -98,7 +98,6 @@ function updateTimer() {
 
   if (secondsLeft <= 0) {
     clearInterval(timerHandle);
-    // Microsoft Forms is responsible for final submission when its own timer ends.
     $("status").textContent = "TIME LIMIT REACHED";
     return;
   }
@@ -123,24 +122,32 @@ startBtn.addEventListener("click", async () => {
   timerHandle = setInterval(updateTimer, 1000);
 });
 
-/*
-  VISIBILITY, FOCUS, AND SECURITY LISTENERS
-  With Strike/Warning System
-*/
+/* ==========================================
+   ENHANCED IFRAME FOCUS & TAB DETECTOR
+   ========================================== */
+
+// 1. Detect when focus shifts to Microsoft Forms iframe specifically
+window.addEventListener("blur", () => {
+  if (!started || frozen) return;
+
+  // If focus moved to the Microsoft Forms iframe, allow it without striking
+  if (document.activeElement === formsFrame) {
+    return;
+  }
+
+  // If focus went completely outside the browser window/app entirely
+  handleViolation(
+    "WINDOW/FOCUS LOST",
+    "The examination window lost focus. Your session has been frozen for teacher verification."
+  );
+});
+
+// 2. Tab/App Switch Guard (Triggers even when interacting inside Microsoft Forms)
 document.addEventListener("visibilitychange", () => {
   if (started && document.hidden) {
     handleViolation(
       "PAGE/APP VISIBILITY LOST",
       "The examination page was no longer visible. Your session has been frozen for teacher verification."
-    );
-  }
-});
-
-window.addEventListener("blur", () => {
-  if (started) {
-    handleViolation(
-      "WINDOW/FOCUS LOST",
-      "The examination window lost focus. Your session has been frozen for teacher verification."
     );
   }
 });
@@ -164,9 +171,7 @@ $("paperBtn").addEventListener("click", () => {
   alert("Please remain in your seat and wait for your teacher/proctor to provide the supervised paper version.");
 });
 
-/*
-  Keyboard deterrence.
-*/
+/* Keyboard deterrence */
 document.addEventListener("keydown", (e) => {
   if (!started) return;
   if (e.key === "F12" ||
